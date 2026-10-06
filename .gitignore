@@ -1,0 +1,16 @@
+# 이 저장소는 freqtrade 전체 소스가 아니라, 우리가 직접 만든 설정/전략만 추적합니다.
+# freqtrade 자체는 setup.sh로 별도 설치(README 참고). 기본적으로 전부 무시하고,
+# 꼭 필요한 파일만 아래에서 허용(unignore)합니다. (경로는 최상위 기준으로 고정)
+
+*
+!/*/
+!/.gitignore
+!/README.md
+!/user_data/
+!/user_data/strategies/
+!/user_data/strategies/*.py
+!/user_data/config.json.example
+
+# 혹시 허용된 폴더 안에 들어와도 캐시/바이트코드는 항상 제외
+__pycache__/
+*.pyc
