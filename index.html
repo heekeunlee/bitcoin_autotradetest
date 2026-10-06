@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autotrade Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* 레이아웃: 상단 스탯 타일 -> 전략 성과 바차트(0선 기준, 승자만 강조) -> v1~v4 타임라인 -> 결론 -> 안전 체크리스트 */
+  :root{
+    --bg:#F4F5F7;
+    --surface:#FFFFFF;
+    --surface-sunken:#ECEEF1;
+    --ink:#16181D;
+    --ink-muted:#5B6168;
+    --ink-faint:#8A8F96;
+    --border:#DDE1E6;
+    --border-strong:#C5CAD1;
+    --accent:#5B5FEF;
+    --accent-ink:#4345B8;
+    --accent-soft:#E7E8FC;
+    --good:#1E8A5F;
+    --good-soft:#DCF0E6;
+    --warning:#9C6B0A;
+    --warning-soft:#F3E6CE;
+    --critical:#B0362F;
+    --critical-soft:#F6DCDA;
+    --muted-line:#C7CCD3;
+    --shadow:0 1px 2px rgba(22,24,29,0.04), 0 4px 14px rgba(22,24,29,0.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121318;
+      --surface:#1B1D24;
+      --surface-sunken:#22242C;
+      --ink:#E7E9EE;
+      --ink-muted:#A7ACB6;
+      --ink-faint:#767C87;
+      --border:#2E313B;
+      --border-strong:#3C4049;
+      --accent:#8C8FFF;
+      --accent-ink:#AEB0FF;
+      --accent-soft:#2A2C4A;
+      --good:#3FA579;
+      --good-soft:#1D3328;
+      --warning:#D1983B;
+      --warning-soft:#3A2E17;
+      --critical:#E2635A;
+      --critical-soft:#3A2220;
+      --muted-line:#434750;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121318;
+    --surface:#1B1D24;
+    --surface-sunken:#22242C;
+    --ink:#E7E9EE;
+    --ink-muted:#A7ACB6;
+    --ink-faint:#767C87;
+    --border:#2E313B;
+    --border-strong:#3C4049;
+    --accent:#8C8FFF;
+    --accent-ink:#AEB0FF;
+    --accent-soft:#2A2C4A;
+    --good:#3FA579;
+    --good-soft:#1D3328;
+    --warning:#D1983B;
+    --warning-soft:#3A2E17;
+    --critical:#E2635A;
+    --critical-soft:#3A2220;
+    --muted-line:#434750;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:'Figtree',-apple-system,sans-serif;
+    font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding-block:0;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  h1,h2,h3{font-family:'JetBrains Mono',ui-monospace,monospace;text-wrap:balance;margin:0;}
+  a{color:var(--accent-ink);}
+  .wrap{max-width:1100px;margin:0 auto;padding:40px 20px 72px;}
+
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:26px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:var(--accent-ink);text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;}
+  .masthead h1{font-size:27px;letter-spacing:-0.01em;font-weight:700;}
+  .masthead .sub{color:var(--ink-muted);font-size:13.5px;margin-top:6px;max-width:50ch;}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.03em;padding:5px 10px;border-radius:5px;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink-muted);white-space:nowrap;}
+  .chip.accent{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);}
+
+  section{margin-bottom:40px;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+  .section-head h2{font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);font-weight:600;}
+  .section-head .note{font-size:12px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:100px;justify-content:space-between;}
+  .stat-tile .label{font-size:11px;color:var(--ink-muted);letter-spacing:.04em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+  .stat-tile .value{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:-0.01em;}
+  .stat-tile .value small{font-size:12.5px;font-weight:500;color:var(--ink-muted);}
+  .stat-tile .delta{font-size:12px;font-weight:600;color:var(--ink-faint);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;box-shadow:var(--shadow);}
+  .card h3{font-size:13px;letter-spacing:.03em;margin-bottom:4px;}
+  .card .card-sub{font-size:12.5px;color:var(--ink-muted);margin-bottom:18px;}
+  .chart-svg{width:100%;height:auto;display:block;}
+  .chart-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;flex-wrap:wrap;}
+  .chart-legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
+  .table-foot-note{margin-top:14px;font-size:12px;color:var(--ink-faint);line-height:1.65;}
+
+  .timeline{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);}
+  .tl-step{display:grid;grid-template-columns:64px 1fr 120px;gap:16px;align-items:start;padding:16px 18px;border-bottom:1px solid var(--border);}
+  .tl-step:last-child{border-bottom:none;}
+  .tl-step .ver{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--ink-faint);}
+  .tl-step.winner .ver{color:var(--accent-ink);}
+  .tl-step .tl-title{font-weight:600;font-size:13.5px;margin-bottom:3px;}
+  .tl-step .tl-desc{font-size:12.5px;color:var(--ink-muted);line-height:1.6;}
+  .pill{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:5px;display:inline-block;letter-spacing:.02em;text-align:center;justify-self:end;white-space:nowrap;}
+  .pill.good{background:var(--good-soft);color:var(--good);}
+  .pill.warn{background:var(--warning-soft);color:var(--warning);}
+  .pill.crit{background:var(--critical-soft);color:var(--critical);}
+
+  .verdict{margin-top:18px;background:var(--surface-sunken);border:1px dashed var(--border-strong);border-radius:8px;padding:14px 16px;font-size:12.5px;color:var(--ink-muted);}
+  .verdict b{color:var(--ink);}
+
+  .check-list{display:flex;flex-direction:column;gap:10px;}
+  .check-item{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--border-strong);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow);}
+  .check-item.good{border-left-color:var(--good);}
+  .check-item.warn{border-left-color:var(--warning);}
+  .check-tag{flex:none;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.03em;padding:4px 9px;border-radius:5px;white-space:nowrap;margin-top:1px;}
+  .check-item.good .check-tag{background:var(--good-soft);color:var(--good);}
+  .check-item.warn .check-tag{background:var(--warning-soft);color:var(--warning);}
+  .check-title{font-weight:600;font-size:13.5px;margin-bottom:3px;}
+  .check-desc{font-size:12.5px;color:var(--ink-muted);line-height:1.6;}
+
+  footer{border-top:1px solid var(--border-strong);padding-top:18px;margin-top:6px;}
+  footer .disclaimer{font-size:12px;color:var(--ink-faint);line-height:1.7;max-width:760px;}
+  footer .sources{margin-top:12px;font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;line-height:1.9;}
+  footer .sources a{color:var(--ink-muted);text-decoration:underline;text-decoration-color:var(--border-strong);}
+
+  @media (max-width:820px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .tl-step{grid-template-columns:40px 1fr;grid-template-rows:auto auto;}
+    .tl-step .pill{grid-column:2;justify-self:start;margin-top:6px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="eyebrow"><span class="dot"></span>PAPER TRADING · FREQTRADE · DRY-RUN</div>
+      <h1>Autotrade Desk</h1>
+      <div class="sub">맥미니에서 돌리는 비트코인 자동매매 모의투자 — 전략 4번 개량, 백테스트로 전부 검증.</div>
+    </div>
+    <div class="chip-row">
+      <span class="chip accent">DATA AS OF 2026-10-06</span>
+      <span class="chip">실제 자금 없음 · 100% 모의투자</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="stat-row">
+      <div class="stat-tile">
+        <div class="label">가상 지갑 총액</div>
+        <div class="value tnum">1,000.14 <small>USDT</small></div>
+        <div class="delta">시작 1,000 USDT 대비 +0.01%</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">열린 포지션</div>
+        <div class="value tnum">1 <small>건</small></div>
+        <div class="delta">ETH/USDT · 진입 06:20</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">운영 전략</div>
+        <div class="value tnum" style="font-size:19px;color:var(--accent-ink)">v2 · RSI+ROI튠</div>
+        <div class="delta">거래소: Binance(공개 시세만)</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">90일 백테스트 수익률</div>
+        <div class="value tnum" style="color:var(--good)">+4.72%</div>
+        <div class="delta">같은 기간 단순보유 +47.23%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STRATEGY COMPARISON CHART ===== -->
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+      <div>
+        <h3>4개 버전 백테스트 성과 — 승자는 하나뿐</h3>
+        <div class="card-sub" style="margin-bottom:0;">90일(2026-07-08~10-06) BTC/USDT·ETH/USDT, 1,000 USDT 가상자본 기준</div>
+      </div>
+      <div style="text-align:right;flex:none;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase;">같은 기간 단순 보유 시</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--good);" class="tnum">+47.23%</div>
+      </div>
+    </div>
+    <div class="card-sub">아래 차트는 네 버전의 실제 범위(-10%~+10%)에 맞춰 그렸습니다 — 단순 보유(+47.23%)는 이 차트 범위의 약 5배라 같은 축에 넣으면 막대가 안 보일 정도로 작아져서, 위에 별도 숫자로 비교합니다.</div>
+
+    <svg class="chart-svg" viewBox="0 0 640 300" role="img" aria-label="전략 4개 버전의 90일 백테스트 수익률. v1 플러스 4.36%, v2(운영중) 플러스 4.72%, v3 마이너스 8.74%, v4 마이너스 2.82%. 같은 기간 단순보유는 플러스 47.23%로 네 버전 모두 크게 못 미침">
+      <!-- zero baseline at y=168, scale: 1% = 1.9px, range -10%~+10% mapped to y=228(bottom,-10%)..30(top,+10%) roughly; using a compressed scale since benchmark(+47%) shown separately as callout, not to scale -->
+      <g stroke="var(--border)" stroke-width="1">
+        <line x1="60" y1="40"  x2="600" y2="40"/>
+        <line x1="60" y1="104" x2="600" y2="104"/>
+        <line x1="60" y1="168" x2="600" y2="168"/>
+        <line x1="60" y1="232" x2="600" y2="232"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--ink-faint)">
+        <text x="54" y="44" text-anchor="end">+10%</text>
+        <text x="54" y="108" text-anchor="end">+5%</text>
+        <text x="54" y="172" text-anchor="end">0%</text>
+        <text x="54" y="236" text-anchor="end">-10%</text>
+      </g>
+      <line x1="60" y1="168" x2="600" y2="168" stroke="var(--border-strong)" stroke-width="1.4"/>
+
+      <!-- bars: zero at y=168, scale 12.8px per 1% -->
+      <!-- v1 +4.36% -> height 55.8, y top=112.2 -->
+      <g>
+        <rect x="100" y="112.2" width="70" height="55.8" rx="4" fill="var(--muted-line)"/>
+        <text x="135" y="104" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--ink-muted)" class="tnum">+4.36%</text>
+        <text x="135" y="256" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--ink-faint)">v1</text>
+        <text x="135" y="270" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ink-faint)">RSI 기본</text>
+      </g>
+      <!-- v2 +4.72% -> height 60.4, y top=107.6 — highlighted winner -->
+      <g>
+        <rect x="200" y="107.6" width="70" height="60.4" rx="4" fill="var(--accent)"/>
+        <text x="235" y="99" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="var(--accent-ink)" class="tnum">+4.72%</text>
+        <text x="235" y="256" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="var(--accent-ink)">v2</text>
+        <text x="235" y="270" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ink-faint)">RSI+ROI튠 · 운영중</text>
+      </g>
+      <!-- v3 -8.74% -> height 111.9, y=168..279.9 but clip chart at 232; actual drawn to 232 with note it extends further -->
+      <g>
+        <rect x="300" y="168" width="70" height="64" rx="4" fill="var(--muted-line)"/>
+        <text x="335" y="248" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--critical)" class="tnum">-8.74%</text>
+        <text x="335" y="18" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--ink-faint)">v3</text>
+        <text x="335" y="270" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ink-faint)" dy="0"></text>
+      </g>
+      <!-- v4 -2.82% -> height 36.1 -->
+      <g>
+        <rect x="400" y="168" width="70" height="36.1" rx="4" fill="var(--muted-line)"/>
+        <text x="435" y="220" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="var(--critical)" class="tnum">-2.82%</text>
+      </g>
+
+      <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--ink-faint)">
+        <text x="335" y="290" text-anchor="middle">v3 추세추종(5분)</text>
+        <text x="435" y="256" text-anchor="middle">v4</text>
+        <text x="435" y="270" text-anchor="middle" font-size="9.5">추세추종+ADX(1h)</text>
+      </g>
+    </svg>
+    <div class="chart-legend">
+      <span><span class="sw" style="background:var(--accent)"></span>현재 운영 중(승자)</span>
+      <span><span class="sw" style="background:var(--muted-line)"></span>중단된 버전</span>
+    </div>
+    <div class="table-foot-note">
+      <b>v3(-8.74%)는 차트 범위(-10%)를 넘어서 실제보다 짧게 표시됐습니다</b> — 정확한 수치는 라벨을 참고하세요. 세부 수치는 <a href="./BACKTEST.md">BACKTEST.md</a> 참고.
+    </div>
+  </section>
+
+  <!-- ===== TIMELINE ===== -->
+  <section>
+    <div class="section-head">
+      <h2>네 번의 시도 — 타임라인</h2>
+      <span class="note">같은 90일 데이터로 반복 검증</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="ver">v1</div>
+        <div>
+          <div class="tl-title">RSI 평균회귀 (freqtrade 기본 예제)</div>
+          <div class="tl-desc">RSI 과매도 구간에서 매수, 과매수에서 매도. 5분봉. 45건 거래, 승률 97.8%.</div>
+        </div>
+        <span class="pill warn">+4.36%</span>
+      </div>
+      <div class="tl-step winner">
+        <div class="ver">v2</div>
+        <div>
+          <div class="tl-title">ROI 목표 상향 + 트레일링스탑 추가 <span class="chip accent" style="margin-left:6px;padding:2px 7px;font-size:9.5px;">현재 운영 중</span></div>
+          <div class="tl-desc">익절 기준을 1~4%에서 1~8%로 올리고, 수익 3% 이상일 때 트레일링스탑으로 추세를 더 오래 탐. 37건 거래, 승률 97.3%.</div>
+        </div>
+        <span class="pill good">+4.72%</span>
+      </div>
+      <div class="tl-step">
+        <div class="ver">v3</div>
+        <div>
+          <div class="tl-title">EMA 추세추종으로 entry 교체 (5분봉)</div>
+          <div class="tl-desc">EMA20/50 골든크로스 매수. 5분봉에서는 크로스가 진짜 추세전환이 아니라 노이즈였음 — 524건 거래, 승률 19.3%로 대실패.</div>
+        </div>
+        <span class="pill crit">-8.74%</span>
+      </div>
+      <div class="tl-step">
+        <div class="ver">v4</div>
+        <div>
+          <div class="tl-title">1시간봉 + ADX 추세강도 필터 추가</div>
+          <div class="tl-desc">노이즈를 줄이려 타임프레임을 올리고 ADX&gt;25 필터를 추가. 93건 거래, 손실은 줄었지만(승률 19.4%) 여전히 마이너스.</div>
+        </div>
+        <span class="pill crit">-2.82%</span>
+      </div>
+    </div>
+    <div class="verdict">
+      <b>결론</b> — 추세추종으로 바꾸자는 판단은 틀렸습니다. v1·v2(RSI 평균회귀)만 양의 수익을 냈고, 추세추종 두 버전은 전부 손실이었습니다. v2로 되돌려 운영 중이며, 네 버전 모두 같은 기간 단순 보유(+47.23%)에 크게 못 미쳤습니다 — 간단한 자동매매가 그냥 사서 들고 있는 것보다 못한 경우가 드물지 않다는 걸 재확인했습니다.
+    </div>
+  </section>
+
+  <!-- ===== SAFETY ===== -->
+  <section>
+    <div class="section-head">
+      <h2>안전 장치</h2>
+      <span class="section-note">실거래 전환 전 꼭 확인</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item good">
+        <span class="check-tag">확인됨</span>
+        <div class="check-body">
+          <div class="check-title">dry_run: true — 실제 자금 전혀 사용 안 함</div>
+          <div class="check-desc">거래소 API 키도 비워둔 상태(공개 시세 데이터만 사용). 1,000 USDT 가상 지갑으로만 시뮬레이션합니다.</div>
+        </div>
+      </div>
+      <div class="check-item good">
+        <span class="check-tag">확인됨</span>
+        <div class="check-body">
+          <div class="check-title">민감 정보는 저장소에 없음</div>
+          <div class="check-desc">웹 대시보드 로그인용 JWT 시크릿·비밀번호는 로컬 <code class="mono">.secrets/</code>에만 있고 <code class="mono">.gitignore</code>로 커밋 방지. 실제 <code class="mono">config.json</code>도 제외, <code class="mono">config.json.example</code>만 공개.</div>
+        </div>
+      </div>
+      <div class="check-item warn">
+        <span class="check-tag">주의</span>
+        <div class="check-body">
+          <div class="check-title">실거래 전환은 권하지 않음</div>
+          <div class="check-desc">4번의 백테스트 중 단순 보유를 이긴 버전이 하나도 없습니다. <code class="mono">dry_run: false</code> + 실제 API 키로 바꾸는 순간 원금 손실 위험이 실제로 발생하니, 지금 성과로는 전환할 이유가 없습니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="disclaimer">
+      이 대시보드는 2026년 10월 6일 기준 Freqtrade 모의투자(dry-run) 백테스트 결과를 바탕으로 작성한 취미용 분석이며 투자 조언이 아닙니다. 모든 수치는 과거 데이터 기준 시뮬레이션이며 실거래 성과를 보장하지 않습니다.
+    </div>
+    <div class="sources">
+      SOURCES —
+      <a href="https://github.com/freqtrade/freqtrade" target="_blank" rel="noopener">Freqtrade</a> ·
+      <a href="./BACKTEST.md" target="_blank" rel="noopener">백테스트 전체 결과</a> ·
+      <a href="./README.md" target="_blank" rel="noopener">설치 방법</a> ·
+      <a href="https://github.com/heekeunlee/coin_mining" target="_blank" rel="noopener">관련 프로젝트: XMR 채굴 대시보드</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
