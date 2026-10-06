@@ -6,6 +6,7 @@
 !/*/
 !/.gitignore
 !/README.md
+!/BACKTEST.md
 !/user_data/
 !/user_data/strategies/
 !/user_data/strategies/*.py

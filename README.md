@@ -38,6 +38,10 @@ freqtrade trade --config user_data/config.json --strategy SampleStrategy
 - 타임프레임: 5분봉
 - 전략: `SampleStrategy` — freqtrade 기본 예제(RSI 기반), **교육용이라 실제로 수익이 나는 전략이 아닙니다.** 백테스팅으로 개선해나가는 중입니다.
 
+## 백테스트 결과
+
+최근 90일 백테스트 결과: **[BACKTEST.md](./BACKTEST.md)** — 승률 97.8%지만 같은 기간 단순 보유(+47.23%)보다 훨씬 못한 +4.36%에 그쳤습니다. 자세한 원인 분석은 해당 문서 참고.
+
 ## 주의사항
 
 - 이 저장소는 모의투자(dry-run) 전용입니다. 실거래로 전환하려면 `dry_run: false`로 바꾸고 실제 거래소 API 키(거래 권한)를 넣어야 하는데, **그 순간부터 원금 손실 위험이 실제로 발생**합니다. 신중하게 결정하세요.
