@@ -64,22 +64,26 @@ class SampleStrategy(IStrategy):
 
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
+    # 2026-10-06 조정: 기존 테이블(0분:4%, 30분:2%, 60분:1%)은 상승장에서 너무 일찍
+    # 익절해버려 90일 백테스트에서 단순보유(+47.23%) 대비 +4.36%로 크게 뒤처졌음.
+    # 목표치를 올리고 트레일링 스탑으로 추세를 더 오래 타도록 조정.
     minimal_roi = {
-        # "120": 0.0,  # exit after 120 minutes at break even
-        "60": 0.01,
-        "30": 0.02,
-        "0": 0.04,
+        "0": 0.08,     # 즉시 익절은 8% 이상일 때만
+        "120": 0.04,   # 2시간 후 4%
+        "720": 0.02,   # 12시간 후 2%
+        "2880": 0.01,  # 2일 후 1%
     }
 
     # Optimal stoploss designed for the strategy.
     # This attribute will be overridden if the config file contains "stoploss".
     stoploss = -0.10
 
-    # Trailing stoploss
-    trailing_stop = False
-    # trailing_only_offset_is_reached = False
-    # trailing_stop_positive = 0.01
-    # trailing_stop_positive_offset = 0.0  # Disabled / not configured
+    # Trailing stoploss — 수익이 3% 이상 나면 활성화, 이후 2% 하락하면 청산
+    # (추세가 계속되는 동안은 들고 있고, 꺾일 때만 수익 확정)
+    trailing_stop = True
+    trailing_only_offset_is_reached = True
+    trailing_stop_positive = 0.02
+    trailing_stop_positive_offset = 0.03
 
     # Optimal timeframe for the strategy.
     timeframe = "5m"
