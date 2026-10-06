@@ -118,6 +118,15 @@
   .chart-legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
   .table-foot-note{margin-top:14px;font-size:12px;color:var(--ink-faint);line-height:1.65;}
 
+  .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--shadow);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px;}
+  thead th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border-strong);position:sticky;top:0;background:var(--surface);}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--border);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-sunken);}
+  td.num{text-align:right;}
+  th.num{text-align:right;}
+
   .timeline{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);}
   .tl-step{display:grid;grid-template-columns:64px 1fr 120px;gap:16px;align-items:start;padding:16px 18px;border-bottom:1px solid var(--border);}
   .tl-step:last-child{border-bottom:none;}
@@ -162,7 +171,7 @@
     <div>
       <div class="eyebrow"><span class="dot"></span>PAPER TRADING · FREQTRADE · DRY-RUN</div>
       <h1>Autotrade Desk</h1>
-      <div class="sub">맥미니에서 돌리는 비트코인 자동매매 모의투자 — 전략 4번 개량, 백테스트로 전부 검증.</div>
+      <div class="sub">맥미니에서 돌리는 비트코인·이더리움 자동매매 모의투자 — 전략 4번 개량, 백테스트로 전부 검증. 거래쌍: BTC/USDT, ETH/USDT (원화 아님, 테더 기준).</div>
     </div>
     <div class="chip-row">
       <span class="chip accent">DATA AS OF 2026-10-06</span>
@@ -191,6 +200,26 @@
         <div class="label">90일 백테스트 수익률</div>
         <div class="value tnum" style="color:var(--good)">+4.72%</div>
         <div class="delta">같은 기간 단순보유 +47.23%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE PRICES ===== -->
+  <section>
+    <div class="section-head">
+      <h2>실시간 시세 (Binance)</h2>
+      <span class="note">2026-10-06 09:10 UTC 기준, USDT 페어</span>
+    </div>
+    <div class="stat-row" style="grid-template-columns:repeat(2,1fr);">
+      <div class="stat-tile">
+        <div class="label">BTC/USDT</div>
+        <div class="value tnum">$85,927.67</div>
+        <div class="delta">비트코인 1개 가격 · 테더 기준</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">ETH/USDT</div>
+        <div class="value tnum">$2,714.99</div>
+        <div class="delta">이더리움 1개 가격 · 테더 기준</div>
       </div>
     </div>
   </section>
@@ -266,6 +295,87 @@
     <div class="table-foot-note">
       <b>v3(-8.74%)는 차트 범위(-10%)를 넘어서 실제보다 짧게 표시됐습니다</b> — 정확한 수치는 라벨을 참고하세요. 세부 수치는 <a href="./BACKTEST.md">BACKTEST.md</a> 참고.
     </div>
+  </section>
+
+  <!-- ===== CURRENT OPEN POSITION ===== -->
+  <section>
+    <div class="section-head">
+      <h2>지금 실제로 열려있는 포지션 (모의투자)</h2>
+      <span class="note">dry-run · 실제 자금 아님</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>코인</th><th>매수 시각</th><th class="num">매수가</th><th class="num">현재가</th><th class="num">평가손익</th><th>상태</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">ETH/USDT</td>
+            <td class="mono">2026-10-06 06:20</td>
+            <td class="num tnum mono">$2,694.89</td>
+            <td class="num tnum mono">$2,715.85</td>
+            <td class="num tnum mono"><span class="pill good">+0.58%</span></td>
+            <td><span class="pill warn">보유 중</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-foot-note">아직 매도 전이라 "얼마에 팔았는지"는 없습니다 — v2 전략의 익절 기준(ROI 1~8%, 보유시간별 차등) 또는 트레일링스탑에 닿으면 자동 청산됩니다.</div>
+  </section>
+
+  <!-- ===== BACKTEST TRADE LOG ===== -->
+  <section>
+    <div class="section-head">
+      <h2>백테스트 상세 거래 기록 (v2, 37건 전부)</h2>
+      <span class="note">90일, 실제 매수가·매도가</span>
+    </div>
+    <div class="table-scroll" style="max-height:420px;overflow-y:auto;">
+      <table>
+        <thead>
+          <tr><th>코인</th><th>매수일</th><th class="num">매수가</th><th>매도일</th><th class="num">매도가</th><th class="num">손익</th><th>청산 사유</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-11</td><td class="num tnum mono">$1,815.62</td><td class="mono">2026-07-14</td><td class="num tnum mono">$1,837.45</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-07-11</td><td class="num tnum mono">$64,203.09</td><td class="mono">2026-07-14</td><td class="num tnum mono">$64,974.94</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-07-16</td><td class="num tnum mono">$64,584.89</td><td class="mono">2026-07-20</td><td class="num tnum mono">$65,361.33</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-16</td><td class="num tnum mono">$1,910.64</td><td class="mono">2026-07-21</td><td class="num tnum mono">$1,933.61</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-21</td><td class="num tnum mono">$1,932.04</td><td class="mono">2026-07-26</td><td class="num tnum mono">$1,955.27</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-28</td><td class="num tnum mono">$1,892.53</td><td class="mono">2026-07-29</td><td class="num tnum mono">$1,934.25</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-29</td><td class="num tnum mono">$1,887.78</td><td class="mono">2026-07-30</td><td class="num tnum mono">$1,929.39</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-07-31</td><td class="num tnum mono">$1,888.96</td><td class="mono">2026-08-05</td><td class="num tnum mono">$1,911.67</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-08</td><td class="num tnum mono">$1,917.34</td><td class="mono">2026-08-19</td><td class="num tnum mono">$1,940.39</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-07-22</td><td class="num tnum mono">$66,263.38</td><td class="mono">2026-08-19</td><td class="num tnum mono">$67,060.00</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-08-20</td><td class="num tnum mono">$69,118.00</td><td class="mono">2026-08-20</td><td class="num tnum mono">$72,026.63</td><td class="num"><span class="pill good">+4.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-20</td><td class="num tnum mono">$2,238.69</td><td class="mono">2026-08-20</td><td class="num tnum mono">$2,273.60</td><td class="num"><span class="pill good">+1.36%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">트레일링스탑</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-22</td><td class="num tnum mono">$2,439.95</td><td class="mono">2026-08-24</td><td class="num tnum mono">$2,469.28</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-08-22</td><td class="num tnum mono">$77,175.88</td><td class="mono">2026-08-24</td><td class="num tnum mono">$78,103.69</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-25</td><td class="num tnum mono">$2,471.32</td><td class="mono">2026-08-27</td><td class="num tnum mono">$2,525.79</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-08-25</td><td class="num tnum mono">$79,080.83</td><td class="mono">2026-08-27</td><td class="num tnum mono">$80,031.54</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-27</td><td class="num tnum mono">$2,497.45</td><td class="mono">2026-08-30</td><td class="num tnum mono">$2,527.47</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-08-28</td><td class="num tnum mono">$79,876.00</td><td class="mono">2026-09-03</td><td class="num tnum mono">$80,836.27</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-08-30</td><td class="num tnum mono">$2,471.95</td><td class="mono">2026-09-03</td><td class="num tnum mono">$2,501.67</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-04</td><td class="num tnum mono">$2,450.56</td><td class="mono">2026-09-06</td><td class="num tnum mono">$2,504.58</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-09-04</td><td class="num tnum mono">$79,401.99</td><td class="mono">2026-09-06</td><td class="num tnum mono">$80,356.56</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-06</td><td class="num tnum mono">$2,491.67</td><td class="mono">2026-09-09</td><td class="num tnum mono">$2,521.62</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-09</td><td class="num tnum mono">$2,494.22</td><td class="mono">2026-09-11</td><td class="num tnum mono">$2,524.21</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-11</td><td class="num tnum mono">$2,520.16</td><td class="mono">2026-09-14</td><td class="num tnum mono">$2,550.46</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-15</td><td class="num tnum mono">$2,517.32</td><td class="mono">2026-09-18</td><td class="num tnum mono">$2,547.58</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-09-07</td><td class="num tnum mono">$79,363.99</td><td class="mono">2026-09-18</td><td class="num tnum mono">$80,318.11</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-20</td><td class="num tnum mono">$2,585.16</td><td class="mono">2026-09-20</td><td class="num tnum mono">$2,642.14</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-09-19</td><td class="num tnum mono">$81,193.41</td><td class="mono">2026-09-21</td><td class="num tnum mono">$82,983.08</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-23</td><td class="num tnum mono">$2,668.82</td><td class="mono">2026-09-25</td><td class="num tnum mono">$2,727.65</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-26</td><td class="num tnum mono">$2,674.67</td><td class="mono">2026-09-29</td><td class="num tnum mono">$2,706.82</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-09-29</td><td class="num tnum mono">$2,675.09</td><td class="mono">2026-09-30</td><td class="num tnum mono">$2,734.05</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-09-23</td><td class="num tnum mono">$85,496.01</td><td class="mono">2026-10-02</td><td class="num tnum mono">$86,523.84</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-10-01</td><td class="num tnum mono">$2,681.30</td><td class="mono">2026-10-02</td><td class="num tnum mono">$2,740.40</td><td class="num"><span class="pill good">+2.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-10-02</td><td class="num tnum mono">$84,218.75</td><td class="mono">2026-10-04</td><td class="num tnum mono">$85,349.99</td><td class="num"><span class="pill good">+1.14%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-10-02</td><td class="num tnum mono">$2,702.51</td><td class="mono">2026-10-04</td><td class="num tnum mono">$2,735.00</td><td class="num"><span class="pill good">+1.0%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">ROI 익절</td></tr>
+          <tr><td class="mono">BTC/USDT</td><td class="mono">2026-10-05</td><td class="num tnum mono">$85,542.03</td><td class="mono">2026-10-06</td><td class="num tnum mono">$85,766.87</td><td class="num"><span class="pill good">+0.06%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">강제청산(기간종료)</td></tr>
+          <tr><td class="mono">ETH/USDT</td><td class="mono">2026-10-05</td><td class="num tnum mono">$2,712.94</td><td class="mono">2026-10-06</td><td class="num tnum mono">$2,709.99</td><td class="num"><span class="pill crit">-0.31%</span></td><td class="mono" style="color:var(--ink-faint);font-size:11.5px;">강제청산(기간종료)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-foot-note">37건 중 36건이 ROI 익절(설계한 목표 수익률 도달), 1건만 트레일링스탑, 마지막 2건은 백테스트 기간이 끝나서 강제로 청산된 것(실제 전략 신호 아님) — 그중 ETH 1건만 손실(-0.31%)이었습니다.</div>
   </section>
 
   <!-- ===== TIMELINE ===== -->
